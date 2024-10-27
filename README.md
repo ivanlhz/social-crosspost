@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Social Crosspost
 
-## Getting Started
+Una aplicación Next.js que permite publicar simultáneamente en Twitter y Threads usando clean architecture.
 
-First, run the development server:
+## Características
+
+- Interfaz moderna y responsive usando Tailwind CSS y shadcn/ui
+- Publicación simultánea en Twitter y Threads
+- Arquitectura limpia con separación de responsabilidades
+- Soporte para TypeScript
+- Diseño minimalista y fácil de usar
+
+## Requisitos Previos
+
+- Node.js 18 o superior
+- Credenciales de API de Twitter
+- Credenciales de API de Threads
+
+## Configuración
+
+1. Clona el repositorio:
+```bash
+git clone <repository-url>
+cd social-crosspost
+```
+
+2. Instala las dependencias:
+```bash
+npm install
+```
+
+3. Copia el archivo de variables de entorno:
+```bash
+cp .env.example .env.local
+```
+
+4. Configura tus credenciales de API:
+   - Obtén tus credenciales de Twitter desde el [Portal de Desarrolladores de Twitter](https://developer.twitter.com)
+   - Obtén tus credenciales de Threads (cuando esté disponible la API oficial)
+   - Actualiza el archivo `.env.local` con tus credenciales
+
+## Desarrollo
+
+Para ejecutar el servidor de desarrollo:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+La aplicación estará disponible en [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Estructura del Proyecto
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── domain/          # Interfaces y tipos
+├── infrastructure/  # Implementaciones de servicios
+├── application/     # Casos de uso
+└── presentation/    # Componentes y UI
+    ├── components/
+    ├── hooks/
+    ├── layouts/
+    └── styles/
+```
 
-## Learn More
+## Uso
 
-To learn more about Next.js, take a look at the following resources:
+1. Abre la aplicación en tu navegador
+2. Escribe el contenido que deseas publicar
+3. Selecciona las plataformas donde quieres publicar (Twitter y/o Threads)
+4. Haz clic en "Post" para publicar en las plataformas seleccionadas
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Contribuir
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Las contribuciones son bienvenidas. Por favor, abre un issue primero para discutir los cambios que te gustaría hacer.
 
-## Deploy on Vercel
+## Licencia
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
