@@ -1,15 +1,17 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { SocialPlatform } from '@/domain/interfaces/ISocialPost';
 import { TwitterService } from '@/infrastructure/services/TwitterService';
 import { ThreadsService } from '@/infrastructure/services/ThreadsService';
+import { TwitterAuthButton } from './TwitterAuthButton';
 
 export function SocialPostForm() {
     const [content, setContent] = useState('');
     const [isPosting, setIsPosting] = useState(false);
+    const [isTwitterAuthenticated, setIsTwitterAuthenticated] = useState(false);
     const [selectedPlatforms, setSelectedPlatforms] = useState<Set<SocialPlatform>>(
         new Set([SocialPlatform.TWITTER, SocialPlatform.THREADS])
     );
@@ -17,11 +19,30 @@ export function SocialPostForm() {
     const twitterService = new TwitterService();
     const threadsService = new ThreadsService();
 
+    useEffect(() => {
+        // Verificar el estado de autenticación al cargar y cuando cambie la URL
+        const checkAuth = async () => {
+            const isAuth = await twitterService.isAuthenticated();
+            setIsTwitterAuthenticated(isAuth);
+
+            // Verificar si venimos de un callback de autenticación
+            if (twitterService.checkAuthCallback()) {
+                setIsTwitterAuthenticated(true);
+            }
+        };
+
+        checkAuth();
+    }, []);
+
     const togglePlatform = (platform: SocialPlatform) => {
         const newPlatforms = new Set(selectedPlatforms);
         if (newPlatforms.has(platform)) {
             newPlatforms.delete(platform);
         } else {
+            if (platform === SocialPlatform.TWITTER && !isTwitterAuthenticated) {
+                twitterService.authenticate();
+                return;
+            }
             newPlatforms.add(platform);
         }
         setSelectedPlatforms(newPlatforms);
@@ -36,6 +57,9 @@ export function SocialPostForm() {
             const postPromises: Promise<boolean>[] = [];
 
             if (selectedPlatforms.has(SocialPlatform.TWITTER)) {
+                if (!isTwitterAuthenticated) {
+                    throw new Error('Not authenticated with Twitter');
+                }
                 postPromises.push(twitterService.post(content));
             }
             if (selectedPlatforms.has(SocialPlatform.THREADS)) {
@@ -69,14 +93,18 @@ export function SocialPostForm() {
                     className="min-h-[120px] bg-background text-foreground"
                 />
                 <div className="flex gap-2">
-                    <Button
-                        type="button"
-                        variant={selectedPlatforms.has(SocialPlatform.TWITTER) ? 'default' : 'outline'}
-                        onClick={() => togglePlatform(SocialPlatform.TWITTER)}
-                        className="dark:hover:bg-slate-800"
-                    >
-                        Twitter
-                    </Button>
+                    {!isTwitterAuthenticated ? (
+                        <TwitterAuthButton />
+                    ) : (
+                        <Button
+                            type="button"
+                            variant={selectedPlatforms.has(SocialPlatform.TWITTER) ? 'default' : 'outline'}
+                            onClick={() => togglePlatform(SocialPlatform.TWITTER)}
+                            className="dark:hover:bg-slate-800"
+                        >
+                            Twitter
+                        </Button>
+                    )}
                     <Button
                         type="button"
                         variant={selectedPlatforms.has(SocialPlatform.THREADS) ? 'default' : 'outline'}
