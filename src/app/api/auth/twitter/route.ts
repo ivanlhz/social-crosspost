@@ -1,27 +1,10 @@
 import { NextResponse } from 'next/server';
 import { OAuth } from 'oauth';
 
-interface RequestTokenResponse {
-    token: string;
-    tokenSecret: string;
-    results: {
-        oauth_token: string;
-        oauth_token_secret: string;
-        oauth_callback_confirmed: 'true' | 'false';
-    };
-}
-
-// Tipo específico que coincide con el error de la librería OAuth
-type OAuthError = Error | {
-    statusCode: number;
-    data?: unknown;
-    message?: string;
-    name?: string;
-}
-
 const TWITTER_API_KEY = process.env.TWITTER_API_KEY!;
 const TWITTER_API_SECRET = process.env.TWITTER_API_SECRET!;
-const CALLBACK_URL = `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/twitter/callback`;
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+const CALLBACK_URL = `${APP_URL}/api/auth/twitter/callback`;
 
 const oauth = new OAuth(
     'https://api.twitter.com/oauth/request_token',
@@ -33,30 +16,34 @@ const oauth = new OAuth(
     'HMAC-SHA1'
 );
 
+interface OAuthResponse {
+    token: string;
+    tokenSecret: string;
+    results?: {
+        oauth_token: string;
+        oauth_token_secret: string;
+        oauth_callback_confirmed: 'true' | 'false';
+    };
+}
+
+interface OAuthError {
+    statusCode: number;
+    data?: unknown;
+}
+
 export async function GET() {
     try {
-        const requestTokenPromise = (): Promise<RequestTokenResponse> => {
+        const requestTokenPromise = (): Promise<OAuthResponse> => {
             return new Promise((resolve, reject) => {
-                oauth.getOAuthRequestToken((
-                    err: OAuthError | null,
-                    oauth_token: string,
-                    oauth_token_secret: string,
-                    results?: { oauth_callback_confirmed: 'true' | 'false' }
-                ) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve({
-                            token: oauth_token,
-                            tokenSecret: oauth_token_secret,
-                            results: {
-                                oauth_token,
-                                oauth_token_secret,
-                                oauth_callback_confirmed: results?.oauth_callback_confirmed || 'false'
-                            }
-                        });
+                oauth.getOAuthRequestToken(
+                    (err: Error | OAuthError | null, token?: string, tokenSecret?: string, results?: OAuthResponse['results']) => {
+                        if (err || !token || !tokenSecret) {
+                            reject(err || new Error('Failed to get request token'));
+                            return;
+                        }
+                        resolve({ token, tokenSecret, results });
                     }
-                });
+                );
             });
         };
 
@@ -65,9 +52,10 @@ export async function GET() {
 
         return NextResponse.json({ url: authUrl });
     } catch (error) {
-        if (error instanceof Error) {
-            console.error('Error initiating Twitter auth:', error.message);
-        }
-        return NextResponse.json({ error: 'Failed to initiate authentication' }, { status: 500 });
+        console.error('Error initiating Twitter auth:', error);
+        return NextResponse.json(
+            { error: 'Failed to initiate authentication' },
+            { status: 500 }
+        );
     }
 }
