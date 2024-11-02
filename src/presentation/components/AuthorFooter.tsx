@@ -1,6 +1,7 @@
 import { Github, Linkedin, Twitter, Globe } from 'lucide-react';
 import Image from 'next/image'
 import Link from 'next/link';
+import { useLanguage } from '../context/LanguageContext';
 
 export const ThreadsIcon = () => <Image
     className="h-4 w-4 dark:invert"
@@ -11,6 +12,8 @@ export const ThreadsIcon = () => <Image
 />
 
 export function AuthorFooter() {
+    const { messages } = useLanguage()
+
     const socialLinks = [
         {
             name: 'Website',
@@ -62,7 +65,7 @@ export function AuthorFooter() {
                 ))}
             </div>
             <p className="text-sm text-muted-foreground">
-                Created by{' '}
+                {messages.footer.createdBy}{' '}
                 <Link
                     href="https://ivanlopezdev.es"
                     target="_blank"

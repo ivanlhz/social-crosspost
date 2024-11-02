@@ -1,0 +1,17 @@
+{
+  "title": "Social Crosspost",
+  "subtitle": "Publica en Twitter y Threads simultáneamente",
+  "form": {
+    "placeholder": "¿Qué estás pensando?",
+    "postButton": "Publicar",
+    "posting": "Publicando...",
+    "connectTwitter": "Conectar con Twitter"
+  },
+  "footer": {
+    "createdBy": "Creado por"
+  },
+  "languages": {
+    "en": "Inglés",
+    "es": "Español"
+  }
+}

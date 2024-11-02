@@ -2,8 +2,11 @@
 
 import React from 'react';
 import { Button } from './ui/button';
+import { useLanguage } from '../context/LanguageContext';
 
 export function TwitterAuthButton() {
+    const { messages } = useLanguage()
+
     const handleAuth = async () => {
         try {
             const response = await fetch('/api/auth/twitter');
@@ -25,7 +28,7 @@ export function TwitterAuthButton() {
             onClick={handleAuth}
             className="bg-[#1DA1F2] hover:bg-[#1a8cd8] text-white"
         >
-            Connect with Twitter
+            {messages.form.connectTwitter}
         </Button>
     );
 }

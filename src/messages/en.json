@@ -1,0 +1,17 @@
+{
+  "title": "Social Crosspost",
+  "subtitle": "Post to Twitter and Threads simultaneously",
+  "form": {
+    "placeholder": "What's on your mind?",
+    "postButton": "Post",
+    "posting": "Posting...",
+    "connectTwitter": "Connect with Twitter"
+  },
+  "footer": {
+    "createdBy": "Created by"
+  },
+  "languages": {
+    "en": "English",
+    "es": "Spanish"
+  }
+}

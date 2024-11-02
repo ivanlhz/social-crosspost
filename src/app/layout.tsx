@@ -3,6 +3,8 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { ThemeProvider } from '@/presentation/components/theme-provider'
 import { ThemeSwitcher } from '@/presentation/components/ui/theme-switcher'
+import { LanguageProvider } from '@/presentation/context/LanguageContext'
+import { LanguageSelector } from '@/presentation/components/LanguageSelector'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,8 +22,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider>
-          <ThemeSwitcher />
-          {children}
+          <LanguageProvider>
+            <ThemeSwitcher />
+            <LanguageSelector />
+            {children}
+          </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>

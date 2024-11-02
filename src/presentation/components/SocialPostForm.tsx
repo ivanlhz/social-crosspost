@@ -7,6 +7,7 @@ import { SocialPlatform } from '@/domain/interfaces/ISocialPost';
 import { TwitterService } from '@/infrastructure/services/TwitterService';
 import { ThreadsService } from '@/infrastructure/services/ThreadsService';
 import { TwitterAuthButton } from './TwitterAuthButton';
+import { useLanguage } from '../context/LanguageContext';
 
 export function SocialPostForm() {
     const [content, setContent] = useState('');
@@ -15,6 +16,7 @@ export function SocialPostForm() {
     const [selectedPlatforms, setSelectedPlatforms] = useState<Set<SocialPlatform>>(
         new Set([SocialPlatform.TWITTER, SocialPlatform.THREADS])
     );
+    const { messages } = useLanguage()
 
     const twitterService = new TwitterService();
     const threadsService = new ThreadsService();
@@ -89,7 +91,7 @@ export function SocialPostForm() {
                 <Textarea
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
-                    placeholder="What's on your mind?"
+                    placeholder={messages.form.placeholder}
                     className="min-h-[120px] bg-background text-foreground"
                 />
                 <div className="flex gap-2">
@@ -120,7 +122,7 @@ export function SocialPostForm() {
                 className="w-full"
                 disabled={isPosting || !content.trim() || selectedPlatforms.size === 0}
             >
-                {isPosting ? 'Posting...' : 'Post'}
+                {isPosting ? messages.form.posting : messages.form.postButton}
             </Button>
         </form>
     );
