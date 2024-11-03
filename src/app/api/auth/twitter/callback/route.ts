@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { OAuth } from 'oauth';
 
+export const dynamic = 'force-dynamic';
+
 const TWITTER_API_KEY = process.env.TWITTER_API_KEY!;
 const TWITTER_API_SECRET = process.env.TWITTER_API_SECRET!;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
@@ -58,6 +60,7 @@ export async function GET(request: NextRequest) {
         const origin = request.headers.get('origin') || APP_URL;
         const redirectUrl = new URL('/', origin);
         redirectUrl.searchParams.set('auth', 'success');
+        redirectUrl.searchParams.set('platform', 'twitter');
 
         // Crear respuesta con cookies
         const response = NextResponse.redirect(redirectUrl);
@@ -86,6 +89,7 @@ export async function GET(request: NextRequest) {
         const origin = request.headers.get('origin') || APP_URL;
         const redirectUrl = new URL('/', origin);
         redirectUrl.searchParams.set('auth', 'error');
+        redirectUrl.searchParams.set('platform', 'twitter');
 
         return NextResponse.redirect(redirectUrl);
     }

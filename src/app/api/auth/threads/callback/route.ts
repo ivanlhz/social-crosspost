@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 const THREADS_APP_ID = process.env.THREADS_APP_ID!;
 const THREADS_APP_SECRET = process.env.THREADS_API_SECRET!;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';

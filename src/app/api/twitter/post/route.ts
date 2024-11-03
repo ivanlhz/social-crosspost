@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { OAuth } from 'oauth';
 
+export const dynamic = 'force-dynamic';
+
 const TWITTER_API_KEY = process.env.TWITTER_API_KEY!;
 const TWITTER_API_SECRET = process.env.TWITTER_API_SECRET!;
 
