@@ -10,6 +10,8 @@ export function middleware(request: NextRequest) {
     const allowedOrigins = [
         'http://localhost:3000',
         'https://localhost:3000',
+        'https://api.twitter.com',
+        'https://www.threads.net',
         appUrl,
         // Permitir URLs de ngrok en desarrollo
         ...(process.env.NODE_ENV === 'development' && origin.includes('ngrok-free.app')
