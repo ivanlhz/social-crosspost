@@ -29,7 +29,7 @@ export function ThreadsAuthButton() {
             onClick={handleAuth}
             className="bg-black hover:bg-gray-800 text-white dark:bg-white dark:hover:bg-gray-200 dark:text-black"
         >
-            {messages.form.connectThreads}
+            {messages.Index.form.connectThreads}
         </Button>
     );
 }

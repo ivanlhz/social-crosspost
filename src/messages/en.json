@@ -1,18 +1,30 @@
 {
-  "title": "Social Crosspost",
-  "subtitle": "Post to Twitter and Threads simultaneously",
-  "form": {
-    "placeholder": "What's on your mind?",
-    "postButton": "Post",
-    "posting": "Posting...",
-    "connectTwitter": "Connect with Twitter",
-    "connectThreads": "Connect with Threads"
+  "Index": {
+    "title": "Social Crosspost",
+    "subtitle": "Post to multiple social networks at once",
+    "description": "Post to multiple social networks at once",
+    "form": {
+      "placeholder": "What's happening?",
+      "post": "Post",
+      "posting": "Posting...",
+      "connectTwitter": "Connect Twitter",
+      "connectThreads": "Connect Threads"
+    },
+    "posting": {
+      "title": "Posting Status",
+      "twitter": "Posting to Twitter...",
+      "twitter_success": "Posted to Twitter ✓",
+      "twitter_error": "Error posting to Twitter ✗",
+      "threads": "Posting to Threads...",
+      "threads_success": "Posted to Threads ✓",
+      "threads_error": "Error posting to Threads ✗"
+    }
   },
   "footer": {
     "createdBy": "Created by"
   },
   "languages": {
     "en": "English",
-    "es": "Spanish"
+    "es": "Español"
   }
 }

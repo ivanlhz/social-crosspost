@@ -1,6 +1,12 @@
-import { ISocialPost } from "@/domain/interfaces/ISocialPost";
+import { ISocialPost, ISocialMediaService } from "../../domain/interfaces/ISocialPost";
 
-export class ThreadsService {
+interface ThreadsResponse {
+    success: boolean;
+    error?: string;
+    details?: string;
+}
+
+export class ThreadsService implements ISocialMediaService {
     private readonly THREADS_API_URL = "https://graph.threads.net/v1.0";
     private readonly userId: string;
     private readonly accessToken: string;
@@ -10,7 +16,20 @@ export class ThreadsService {
         this.accessToken = accessToken;
     }
 
-    async post(post: ISocialPost): Promise<{ success: boolean; error?: string }> {
+    async post(content: string): Promise<boolean> {
+        const result = await this.postToThreads({ content, platforms: [] });
+        return result.success;
+    }
+
+    async isAuthenticated(): Promise<boolean> {
+        return Boolean(this.userId && this.accessToken);
+    }
+
+    async authenticate(): Promise<void> {
+        // Authentication is handled by the OAuth flow in the API routes
+    }
+
+    private async postToThreads(post: ISocialPost): Promise<ThreadsResponse> {
         try {
             // Step 1: Create the media container
             const containerResponse = await fetch(

@@ -1,8 +1,8 @@
 'use client';
 
-import { SocialPostForm } from "@/presentation/components/SocialPostForm";
-import { AuthorFooter } from "@/presentation/components/AuthorFooter";
-import { useLanguage } from "@/presentation/context/LanguageContext";
+import SocialPostForm from "../presentation/components/SocialPostForm";
+import { AuthorFooter } from "../presentation/components/AuthorFooter";
+import { useLanguage } from "../presentation/context/LanguageContext";
 
 export default function Home() {
   const { messages } = useLanguage();
@@ -17,10 +17,10 @@ export default function Home() {
         <div className="relative rounded-xl bg-background/90 backdrop-blur-3xl shadow-2xl p-8 space-y-6">
           <div className="text-center space-y-2">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-[#ff80b5] via-[#9089fc] to-[#80d5ff] inline-block text-transparent bg-clip-text">
-              {messages.title}
+              {messages.Index.title}
             </h1>
             <p className="text-sm text-muted-foreground">
-              {messages.subtitle}
+              {messages.Index.subtitle}
             </p>
           </div>
           <SocialPostForm />

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Button } from './ui/button';
-import { useLanguage } from '@/presentation/context/LanguageContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export function TwitterAuthButton() {
     const { messages } = useLanguage();
@@ -28,7 +28,7 @@ export function TwitterAuthButton() {
             onClick={handleAuth}
             className="bg-[#1DA1F2] hover:bg-[#1a8cd8] text-white"
         >
-            {messages.form.connectTwitter}
+            {messages.Index.form.connectTwitter}
         </Button>
     );
 }

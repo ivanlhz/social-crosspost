@@ -1,12 +1,24 @@
 {
-  "title": "Social Crosspost",
-  "subtitle": "Publica en Twitter y Threads simultáneamente",
-  "form": {
-    "placeholder": "¿Qué estás pensando?",
-    "postButton": "Publicar",
-    "posting": "Publicando...",
-    "connectTwitter": "Conectar con Twitter",
-    "connectThreads": "Conectar con Threads"
+  "Index": {
+    "title": "Social Crosspost",
+    "subtitle": "Publica en múltiples redes sociales a la vez",
+    "description": "Publica en múltiples redes sociales a la vez",
+    "form": {
+      "placeholder": "¿Qué está pasando?",
+      "post": "Publicar",
+      "posting": "Publicando...",
+      "connectTwitter": "Conectar Twitter",
+      "connectThreads": "Conectar Threads"
+    },
+    "posting": {
+      "title": "Estado de Publicación",
+      "twitter": "Publicando en Twitter...",
+      "twitter_success": "Publicado en Twitter ✓",
+      "twitter_error": "Error al publicar en Twitter ✗",
+      "threads": "Publicando en Threads...",
+      "threads_success": "Publicado en Threads ✓",
+      "threads_error": "Error al publicar en Threads ✗"
+    }
   },
   "footer": {
     "createdBy": "Creado por"
