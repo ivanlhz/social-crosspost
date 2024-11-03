@@ -4,12 +4,12 @@ import React from 'react';
 import { Button } from './ui/button';
 import { useLanguage } from '@/presentation/context/LanguageContext';
 
-export function TwitterAuthButton() {
+export function ThreadsAuthButton() {
     const { messages } = useLanguage();
 
     const handleAuth = async () => {
         try {
-            const response = await fetch('/api/auth/twitter');
+            const response = await fetch('/api/auth/threads');
             const data = await response.json();
 
             if (data.url) {
@@ -18,17 +18,17 @@ export function TwitterAuthButton() {
                 throw new Error('No authentication URL received');
             }
         } catch (error) {
-            console.error('Error initiating Twitter auth:', error);
-            alert('Failed to initiate Twitter authentication');
+            console.error('Error initiating Threads auth:', error);
+            alert('Failed to initiate Threads authentication');
         }
     };
 
     return (
         <Button
             onClick={handleAuth}
-            className="bg-[#1DA1F2] hover:bg-[#1a8cd8] text-white"
+            className="bg-black hover:bg-gray-800 text-white dark:bg-white dark:hover:bg-gray-200 dark:text-black"
         >
-            {messages.form.connectTwitter}
+            {messages.form.connectThreads}
         </Button>
     );
 }

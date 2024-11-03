@@ -1,18 +1,10 @@
-import { Github, Linkedin, Twitter, Globe } from 'lucide-react';
-import Image from 'next/image'
-import Link from 'next/link';
-import { useLanguage } from '../context/LanguageContext';
+'use client';
 
-export const ThreadsIcon = () => <Image
-    className="h-4 w-4 dark:invert"
-    src="/threads.svg"
-    alt="threads logo"
-    width="20"
-    height="20"
-/>
+import { Github, Linkedin, Twitter, Globe, ExternalLink } from 'lucide-react';
+import { useLanguage } from '@/presentation/context/LanguageContext';
 
 export function AuthorFooter() {
-    const { messages } = useLanguage()
+    const { messages } = useLanguage();
 
     const socialLinks = [
         {
@@ -30,8 +22,8 @@ export function AuthorFooter() {
         {
             name: 'Threads',
             url: 'https://www.threads.net/@ivanlopezdev',
-            icon: ThreadsIcon,
-            hoverClass: 'text-gray-500 dark:text-gray-400 dark:hover:text-white hover:text-gray-900'
+            icon: ExternalLink,
+            hoverClass: 'hover:text-[#000000] dark:hover:text-white'
         },
         {
             name: 'LinkedIn',
@@ -51,7 +43,7 @@ export function AuthorFooter() {
         <footer className="mt-8 text-center space-y-4">
             <div className="flex items-center justify-center space-x-4">
                 {socialLinks.map((link) => (
-                    <Link
+                    <a
                         key={link.name}
                         href={link.url}
                         target="_blank"
@@ -61,19 +53,19 @@ export function AuthorFooter() {
                     >
                         <link.icon className="w-5 h-5" />
                         <span className="sr-only">{link.name}</span>
-                    </Link>
+                    </a>
                 ))}
             </div>
             <p className="text-sm text-muted-foreground">
                 {messages.footer.createdBy}{' '}
-                <Link
+                <a
                     href="https://ivanlopezdev.es"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-medium text-foreground hover:underline"
                 >
                     Iván López Hdez
-                </Link>
+                </a>
             </p>
         </footer>
     );

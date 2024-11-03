@@ -7,29 +7,35 @@ import { SocialPlatform } from '@/domain/interfaces/ISocialPost';
 import { TwitterService } from '@/infrastructure/services/TwitterService';
 import { ThreadsService } from '@/infrastructure/services/ThreadsService';
 import { TwitterAuthButton } from './TwitterAuthButton';
-import { useLanguage } from '../context/LanguageContext';
+import { ThreadsAuthButton } from './ThreadsAuthButton';
+import { useLanguage } from '@/presentation/context/LanguageContext';
 
 export function SocialPostForm() {
+    const { messages } = useLanguage();
     const [content, setContent] = useState('');
     const [isPosting, setIsPosting] = useState(false);
     const [isTwitterAuthenticated, setIsTwitterAuthenticated] = useState(false);
+    const [isThreadsAuthenticated, setIsThreadsAuthenticated] = useState(false);
     const [selectedPlatforms, setSelectedPlatforms] = useState<Set<SocialPlatform>>(
         new Set([SocialPlatform.TWITTER, SocialPlatform.THREADS])
     );
-    const { messages } = useLanguage()
 
     const twitterService = new TwitterService();
     const threadsService = new ThreadsService();
 
     useEffect(() => {
-        // Verificar el estado de autenticación al cargar y cuando cambie la URL
         const checkAuth = async () => {
-            const isAuth = await twitterService.isAuthenticated();
-            setIsTwitterAuthenticated(isAuth);
+            const isTwitterAuth = await twitterService.isAuthenticated();
+            const isThreadsAuth = await threadsService.isAuthenticated();
 
-            // Verificar si venimos de un callback de autenticación
+            setIsTwitterAuthenticated(isTwitterAuth);
+            setIsThreadsAuthenticated(isThreadsAuth);
+
             if (twitterService.checkAuthCallback()) {
                 setIsTwitterAuthenticated(true);
+            }
+            if (threadsService.checkAuthCallback()) {
+                setIsThreadsAuthenticated(true);
             }
         };
 
@@ -43,6 +49,10 @@ export function SocialPostForm() {
         } else {
             if (platform === SocialPlatform.TWITTER && !isTwitterAuthenticated) {
                 twitterService.authenticate();
+                return;
+            }
+            if (platform === SocialPlatform.THREADS && !isThreadsAuthenticated) {
+                threadsService.authenticate();
                 return;
             }
             newPlatforms.add(platform);
@@ -65,6 +75,9 @@ export function SocialPostForm() {
                 postPromises.push(twitterService.post(content));
             }
             if (selectedPlatforms.has(SocialPlatform.THREADS)) {
+                if (!isThreadsAuthenticated) {
+                    throw new Error('Not authenticated with Threads');
+                }
                 postPromises.push(threadsService.post(content));
             }
 
@@ -86,7 +99,7 @@ export function SocialPostForm() {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-md mx-auto p-4">
+        <form onSubmit={handleSubmit} className="space-y-4 w-full">
             <div className="space-y-2">
                 <Textarea
                     value={content}
@@ -107,14 +120,18 @@ export function SocialPostForm() {
                             Twitter
                         </Button>
                     )}
-                    <Button
-                        type="button"
-                        variant={selectedPlatforms.has(SocialPlatform.THREADS) ? 'default' : 'outline'}
-                        onClick={() => togglePlatform(SocialPlatform.THREADS)}
-                        className="dark:hover:bg-slate-800"
-                    >
-                        Threads
-                    </Button>
+                    {!isThreadsAuthenticated ? (
+                        <ThreadsAuthButton />
+                    ) : (
+                        <Button
+                            type="button"
+                            variant={selectedPlatforms.has(SocialPlatform.THREADS) ? 'default' : 'outline'}
+                            onClick={() => togglePlatform(SocialPlatform.THREADS)}
+                            className="dark:hover:bg-slate-800"
+                        >
+                            Threads
+                        </Button>
+                    )}
                 </div>
             </div>
             <Button

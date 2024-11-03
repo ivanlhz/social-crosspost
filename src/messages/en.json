@@ -5,7 +5,8 @@
     "placeholder": "What's on your mind?",
     "postButton": "Post",
     "posting": "Posting...",
-    "connectTwitter": "Connect with Twitter"
+    "connectTwitter": "Connect with Twitter",
+    "connectThreads": "Connect with Threads"
   },
   "footer": {
     "createdBy": "Created by"

@@ -5,7 +5,8 @@
     "placeholder": "¿Qué estás pensando?",
     "postButton": "Publicar",
     "posting": "Publicando...",
-    "connectTwitter": "Conectar con Twitter"
+    "connectTwitter": "Conectar con Twitter",
+    "connectThreads": "Conectar con Threads"
   },
   "footer": {
     "createdBy": "Creado por"
