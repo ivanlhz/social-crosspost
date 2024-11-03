@@ -1,58 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { OAuth } from 'oauth';
 
 const THREADS_APP_ID = process.env.THREADS_APP_ID!;
-const THREADS_API_SECRET = process.env.THREADS_API_SECRET!;
+const THREADS_APP_SECRET = process.env.THREADS_API_SECRET!;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-
-const oauth = new OAuth(
-    'https://www.threads.net/oauth/request_token',
-    'https://www.threads.net/oauth/access_token',
-    THREADS_APP_ID,
-    THREADS_API_SECRET,
-    '1.0A',
-    `${APP_URL}/api/auth/threads/callback`,
-    'HMAC-SHA1'
-);
-
-interface AccessTokenResponse {
-    accessToken: string;
-    accessTokenSecret: string;
-}
-
-interface OAuthError {
-    statusCode: number;
-    data?: unknown;
-}
+const CALLBACK_URL = `${APP_URL}/api/auth/threads/callback`;
 
 export async function GET(request: NextRequest) {
     try {
         const searchParams = request.nextUrl.searchParams;
-        const oauthToken = searchParams.get('oauth_token');
-        const oauthVerifier = searchParams.get('oauth_verifier');
+        const code = searchParams.get('code');
+        const error = searchParams.get('error');
+        const error_reason = searchParams.get('error_reason');
+        const error_description = searchParams.get('error_description');
 
-        if (!oauthToken || !oauthVerifier) {
-            throw new Error('Missing oauth parameters');
+        // Handle authorization denial
+        if (error || error_reason || error_description) {
+            console.error('Authorization denied:', { error, error_reason, error_description });
+            const origin = request.headers.get('origin') || APP_URL;
+            const redirectUrl = new URL('/', origin);
+            redirectUrl.searchParams.set('auth', 'error');
+            redirectUrl.searchParams.set('platform', 'threads');
+            return NextResponse.redirect(redirectUrl);
         }
 
-        const accessTokenPromise = (): Promise<AccessTokenResponse> => {
-            return new Promise((resolve, reject) => {
-                oauth.getOAuthAccessToken(
-                    oauthToken,
-                    '',
-                    oauthVerifier,
-                    (error: Error | OAuthError | null, accessToken?: string, accessTokenSecret?: string) => {
-                        if (error || !accessToken || !accessTokenSecret) {
-                            reject(error || new Error('Failed to get access token'));
-                        } else {
-                            resolve({ accessToken, accessTokenSecret });
-                        }
-                    }
-                );
-            });
-        };
+        if (!code) {
+            throw new Error('No authorization code received');
+        }
 
-        const { accessToken, accessTokenSecret } = await accessTokenPromise();
+        // Exchange code for access token
+        const tokenResponse = await fetch('https://graph.threads.net/oauth/access_token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                client_id: THREADS_APP_ID,
+                client_secret: THREADS_APP_SECRET,
+                code: code,
+                grant_type: 'authorization_code',
+                redirect_uri: CALLBACK_URL,
+            }),
+        });
+
+        if (!tokenResponse.ok) {
+            throw new Error('Failed to exchange code for token');
+        }
+
+        const tokenData = await tokenResponse.json();
 
         // Determinar la URL base para la redirección
         const origin = request.headers.get('origin') || APP_URL;
@@ -68,15 +62,15 @@ export async function GET(request: NextRequest) {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax' as const,
-            maxAge: 60 * 60 * 24 * 7, // 1 semana
+            maxAge: 60 * 60 * 24 * 7, // 1 week
             path: '/',
             domain: process.env.NODE_ENV === 'development' && origin.includes('ngrok-free.app')
                 ? '.ngrok-free.app'
                 : undefined
         };
 
-        response.cookies.set('threads_access_token', accessToken, cookieOptions);
-        response.cookies.set('threads_access_token_secret', accessTokenSecret, cookieOptions);
+        response.cookies.set('threads_access_token', tokenData.access_token, cookieOptions);
+        response.cookies.set('threads_user_id', tokenData.user_id.toString(), cookieOptions);
 
         return response;
     } catch (error) {

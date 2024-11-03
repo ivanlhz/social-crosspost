@@ -1,4 +1,4 @@
-import { ISocialMediaService } from '@/domain/interfaces/ISocialPost';
+import { ISocialMediaService } from '../../domain/interfaces/ISocialPost';
 
 interface ThreadsPostResponse {
     success: boolean;
@@ -11,12 +11,10 @@ interface ThreadsPostResponse {
 }
 
 export class ThreadsService implements ISocialMediaService {
-    private apiKey: string;
-    private apiSecret: string;
+    private appId: string;
 
     constructor() {
-        this.apiKey = process.env.THREADS_APP_ID || '';
-        this.apiSecret = process.env.THREADS_API_SECRET || '';
+        this.appId = process.env.THREADS_APP_ID || '';
     }
 
     async post(content: string): Promise<boolean> {
@@ -27,7 +25,7 @@ export class ThreadsService implements ISocialMediaService {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ content }),
-                credentials: 'include', // Importante: incluir cookies en la solicitud
+                credentials: 'include', // Important: include cookies in the request
             });
 
             if (!response.ok) {
@@ -46,16 +44,16 @@ export class ThreadsService implements ISocialMediaService {
 
     async isAuthenticated(): Promise<boolean> {
         try {
-            // Verificar si hay cookies de autenticación
+            // Check for authentication cookies
             const cookies = document.cookie.split(';');
             const hasAccessToken = cookies.some(cookie =>
                 cookie.trim().startsWith('threads_access_token=')
             );
-            const hasAccessTokenSecret = cookies.some(cookie =>
-                cookie.trim().startsWith('threads_access_token_secret=')
+            const hasUserId = cookies.some(cookie =>
+                cookie.trim().startsWith('threads_user_id=')
             );
 
-            return hasAccessToken && hasAccessTokenSecret;
+            return hasAccessToken && hasUserId;
         } catch (error) {
             console.error('Error checking Threads authentication:', error);
             return false;
@@ -65,7 +63,7 @@ export class ThreadsService implements ISocialMediaService {
     async authenticate(): Promise<void> {
         try {
             const response = await fetch('/api/auth/threads', {
-                credentials: 'include', // Importante: incluir cookies en la solicitud
+                credentials: 'include',
             });
 
             if (!response.ok) {
@@ -75,7 +73,8 @@ export class ThreadsService implements ISocialMediaService {
             const data = await response.json();
 
             if (data.url) {
-                window.location.href = data.url;
+                // Open authorization window in system browser as per Threads documentation
+                window.open(data.url, '_system');
             } else {
                 throw new Error('No authentication URL received');
             }
@@ -85,7 +84,7 @@ export class ThreadsService implements ISocialMediaService {
         }
     }
 
-    // Método para verificar el estado de autenticación desde la URL
+    // Method to check authentication status from URL
     checkAuthCallback(): boolean {
         const urlParams = new URLSearchParams(window.location.search);
         const authStatus = urlParams.get('auth');

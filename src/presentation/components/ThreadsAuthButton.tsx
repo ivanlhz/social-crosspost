@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Button } from './ui/button';
-import { useLanguage } from '@/presentation/context/LanguageContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export function ThreadsAuthButton() {
     const { messages } = useLanguage();
@@ -13,7 +13,8 @@ export function ThreadsAuthButton() {
             const data = await response.json();
 
             if (data.url) {
-                window.location.href = data.url;
+                // Open the authorization window in system browser as per Threads documentation
+                window.open(data.url, '_system');
             } else {
                 throw new Error('No authentication URL received');
             }

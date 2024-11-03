@@ -1,37 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { OAuth } from 'oauth';
-
-const THREADS_APP_ID = process.env.THREADS_APP_ID!;
-const THREADS_API_SECRET = process.env.THREADS_API_SECRET!;
 
 interface ThreadsResponse {
-    data: {
-        id: string;
-        text: string;
-    };
+    id: string;
 }
-
-interface OAuthError {
-    statusCode: number;
-    data?: unknown;
-}
-
-const oauth = new OAuth(
-    'https://www.threads.net/oauth/request_token',
-    'https://www.threads.net/oauth/access_token',
-    THREADS_APP_ID,
-    THREADS_API_SECRET,
-    '1.0A',
-    null,
-    'HMAC-SHA1'
-);
 
 export async function POST(request: NextRequest) {
     try {
         const accessToken = request.cookies.get('threads_access_token')?.value;
-        const accessTokenSecret = request.cookies.get('threads_access_token_secret')?.value;
+        const userId = request.cookies.get('threads_user_id')?.value;
 
-        if (!accessToken || !accessTokenSecret) {
+        if (!accessToken || !userId) {
             return NextResponse.json(
                 { error: 'Not authenticated with Threads' },
                 { status: 401 }
@@ -48,48 +26,32 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const postThreadPromise = (): Promise<ThreadsResponse> => {
-            return new Promise((resolve, reject) => {
-                const threadData = JSON.stringify({ text: content });
-                const headers = {
-                    'Content-Type': 'application/json',
-                    'Content-Length': Buffer.byteLength(threadData).toString()
-                };
+        // Post to Threads using the Graph API
+        const response = await fetch(`https://graph.threads.net/${userId}/threads`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                text: content,
+            }),
+        });
 
-                oauth.post(
-                    'https://www.threads.net/api/v1/text',
-                    accessToken,
-                    accessTokenSecret,
-                    threadData,
-                    headers['Content-Type'],
-                    (error: Error | OAuthError | null, result?: string | Buffer) => {
-                        if (error) {
-                            console.error('Threads API Error:', error);
-                            reject(error);
-                            return;
-                        }
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Threads API Error:', errorData);
+            throw new Error(errorData.error?.message || 'Failed to post to Threads');
+        }
 
-                        if (!result) {
-                            reject(new Error('No response from Threads'));
-                            return;
-                        }
+        const data: ThreadsResponse = await response.json();
 
-                        try {
-                            const data = typeof result === 'string' ? result : result.toString('utf-8');
-                            const response = JSON.parse(data) as ThreadsResponse;
-                            resolve(response);
-                        } catch {
-                            reject(new Error('Failed to parse Threads response'));
-                        }
-                    }
-                );
-            });
-        };
-
-        const response = await postThreadPromise();
         return NextResponse.json({
             success: true,
-            post: response.data
+            post: {
+                id: data.id,
+                text: content
+            }
         });
     } catch (error) {
         console.error('Error posting to Threads:', error);
