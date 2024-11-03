@@ -1,94 +1,69 @@
-import { ISocialMediaService } from '../../domain/interfaces/ISocialPost';
+import { ISocialPost } from "@/domain/interfaces/ISocialPost";
 
-interface ThreadsPostResponse {
-    success: boolean;
-    post?: {
-        id: string;
-        text: string;
-    };
-    error?: string;
-    details?: string;
-}
+export class ThreadsService {
+    private readonly THREADS_API_URL = "https://graph.threads.net/v1.0";
+    private readonly userId: string;
+    private readonly accessToken: string;
 
-export class ThreadsService implements ISocialMediaService {
-    private appId: string;
-
-    constructor() {
-        this.appId = process.env.THREADS_APP_ID || '';
+    constructor(userId: string, accessToken: string) {
+        this.userId = userId;
+        this.accessToken = accessToken;
     }
 
-    async post(content: string): Promise<boolean> {
+    async post(post: ISocialPost): Promise<{ success: boolean; error?: string }> {
         try {
-            const response = await fetch('/api/threads/post', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ content }),
-                credentials: 'include', // Important: include cookies in the request
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                console.error('Threads API error:', errorData);
-                throw new Error(errorData.error || 'Failed to post to Threads');
-            }
-
-            const data: ThreadsPostResponse = await response.json();
-            return data.success;
-        } catch (error) {
-            console.error('Error posting to Threads:', error);
-            return false;
-        }
-    }
-
-    async isAuthenticated(): Promise<boolean> {
-        try {
-            // Check for authentication cookies
-            const cookies = document.cookie.split(';');
-            const hasAccessToken = cookies.some(cookie =>
-                cookie.trim().startsWith('threads_access_token=')
-            );
-            const hasUserId = cookies.some(cookie =>
-                cookie.trim().startsWith('threads_user_id=')
+            // Step 1: Create the media container
+            const containerResponse = await fetch(
+                `${this.THREADS_API_URL}/${this.userId}/threads`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        text: post.content,
+                        media_type: "TEXT", // Adding the required media_type parameter
+                        access_token: this.accessToken,
+                    }),
+                }
             );
 
-            return hasAccessToken && hasUserId;
-        } catch (error) {
-            console.error('Error checking Threads authentication:', error);
-            return false;
-        }
-    }
-
-    async authenticate(): Promise<void> {
-        try {
-            const response = await fetch('/api/auth/threads', {
-                credentials: 'include',
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to initiate Threads authentication');
+            if (!containerResponse.ok) {
+                const error = await containerResponse.json();
+                throw new Error(
+                    error.error?.message || "Failed to create Threads container"
+                );
             }
 
-            const data = await response.json();
+            const { id: containerId } = await containerResponse.json();
 
-            if (data.url) {
-                // Open authorization window in system browser as per Threads documentation
-                window.open(data.url, '_system');
-            } else {
-                throw new Error('No authentication URL received');
+            // Step 2: Publish the container
+            const publishResponse = await fetch(
+                `${this.THREADS_API_URL}/${this.userId}/threads_publish`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        creation_id: containerId,
+                        access_token: this.accessToken,
+                    }),
+                }
+            );
+
+            if (!publishResponse.ok) {
+                const error = await publishResponse.json();
+                throw new Error(error.error?.message || "Failed to publish to Threads");
             }
-        } catch (error) {
-            console.error('Error authenticating with Threads:', error);
-            throw error;
-        }
-    }
 
-    // Method to check authentication status from URL
-    checkAuthCallback(): boolean {
-        const urlParams = new URLSearchParams(window.location.search);
-        const authStatus = urlParams.get('auth');
-        const platform = urlParams.get('platform');
-        return authStatus === 'success' && platform === 'threads';
+            return { success: true };
+        } catch (error: any) {
+            return {
+                success: false,
+                error: "Failed to post to Threads",
+                details: error.message,
+            };
+        }
     }
 }
