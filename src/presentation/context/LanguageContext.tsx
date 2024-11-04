@@ -1,8 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import en from '@/messages/en.json';
-import es from '@/messages/es.json';
+import en from '../../messages/en.json';
+import es from '../../messages/es.json';
 
 type Language = 'en' | 'es';
 type Messages = typeof en;
@@ -19,9 +19,11 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
     const [language, setLanguage] = useState<Language>('en');
+    const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
-        const savedLanguage = localStorage.getItem('language') as Language;
+        setIsClient(true);
+        const savedLanguage = localStorage?.getItem('language') as Language;
         if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'es')) {
             setLanguage(savedLanguage);
         }
@@ -29,8 +31,15 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
     const handleSetLanguage = (lang: Language) => {
         setLanguage(lang);
-        localStorage.setItem('language', lang);
+        if (typeof window !== 'undefined') {
+            localStorage?.setItem('language', lang);
+        }
     };
+
+    // Prevent hydration mismatch by only rendering children after client-side hydration
+    if (!isClient) {
+        return null;
+    }
 
     return (
         <LanguageContext.Provider
